@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -13,7 +12,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import fr.unilim.info.authent.exception.CompteDejaInscritException;
 import fr.unilim.info.authent.exception.CompteInactifException;
 import fr.unilim.info.authent.exception.CompteInexistantException;
 import fr.unilim.info.authent.exception.MotDePasseIncorrectException;
@@ -33,6 +31,7 @@ public class ConnectionTest {
 		this.annuaire = Mockito.mock(IAnnuaire.class);
 		this.service = new ServiceAuthentification(annuaire);
 		this.sessionEnCours = ServiceAuthentificationFixture.creerListeSession();
+		this.service.setSessionsEnCours(sessionEnCours);
 	}
 	
 	@Test(expected = CompteInexistantException.class)
@@ -44,5 +43,91 @@ public class ConnectionTest {
 		Mockito.when(annuaire.recupererCompteParIdentifiant(id)).thenReturn(null);
 		this.service.connecter(id, mdp);
 		//Then
+	}
+	
+	@Test(expected = CompteInactifException.class)
+	public void connecterCompteInactif() throws CompteInexistantException, CompteInactifException, MotDePasseIncorrectException  {
+		//Given
+		String mdp = "patate";
+		String id = "pattate";
+		//When
+		Mockito.when(annuaire.recupererCompteParIdentifiant(id)).thenReturn(new Compte(id));
+		this.service.connecter(id, mdp);
+		//Then
+	}
+	
+	@Test(expected = MotDePasseIncorrectException.class)
+	public void connecterMauvaisMdp() throws CompteInexistantException, CompteInactifException, MotDePasseIncorrectException  {
+		//Given
+		String mdp = "patate";
+		String id = "kiwi";
+		//When
+		Mockito.when(annuaire.recupererCompteParIdentifiant(id)).thenReturn(new Compte(id));
+		Mockito.when(annuaire.verifierMotDePasse(id,mdp)).thenReturn(false);
+		this.service.connecter(id,mdp);
+		
+		//Then
+	}
+	
+	@Test
+	public void connecterBonMdp() throws CompteInexistantException, CompteInactifException, MotDePasseIncorrectException  {
+		//Given
+		String mdp = "patate";
+		String id = "kiwi";
+		//When
+		Mockito.when(annuaire.recupererCompteParIdentifiant(id)).thenReturn(new Compte(id));
+		Mockito.when(annuaire.verifierMotDePasse(id,mdp)).thenReturn(true);
+		this.service.connecter(id,mdp);
+		
+		//Then
+		assertTrue(this.service.estConnecte(id));
+	}
+	
+	@Test
+	public void estConnecteFaux(){
+		//Given
+		Boolean resu ;
+		String id = "faux";
+		//When
+		
+		resu = this.service.estConnecte(id);
+		//Then
+		assertFalse(resu);
+	}
+	
+	@Test
+	public void estConnecteVrai(){
+		//Given
+		Boolean resu ;
+		String id = "patate";
+		//When
+		
+		resu = this.service.estConnecte(id);
+		//Then
+		assertTrue(resu);
+	}
+	
+	@Test
+	public void deconnecterFaux(){
+		//Given
+		Boolean resu ;
+		String id = "faux";
+		//When
+		
+		resu = this.service.deconnecter(id);
+		//Then
+		assertFalse(resu);
+	}
+	
+	@Test
+	public void deconnecterVrai(){
+		//Given
+		Boolean resu ;
+		String id = "patate";
+		//When
+		
+		resu = this.service.deconnecter(id);
+		//Then
+		assertTrue(resu);
 	}
 }

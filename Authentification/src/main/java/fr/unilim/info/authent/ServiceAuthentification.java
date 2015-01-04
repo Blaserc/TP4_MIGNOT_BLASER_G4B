@@ -113,6 +113,7 @@ public class ServiceAuthentification {
 		boolean res = false;
 		if(estConnecte(id)) {
 			res = getSessionsEnCours().remove(id);
+			res = true;
 		}
 		return res;
 	}
@@ -125,4 +126,12 @@ public class ServiceAuthentification {
 		return sessionsEnCours;
 	}
 
+	/**
+	 * Permet de recuperer la liste des sessions en cours
+	 * @return 
+	 * @return la liste des sessions en cours
+	 */
+	protected void setSessionsEnCours(List<String> sessionsEnCours) {
+		this.sessionsEnCours = sessionsEnCours;
+	}
 }
